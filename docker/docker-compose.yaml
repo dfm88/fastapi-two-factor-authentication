@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+## WEB APP
+
+
+## POSTGRESQL
+  db:
+    image: postgres
+    container_name: fastapi-2fa-db
+    restart: always
+    volumes:
+      - ./data/pgdata:/var/lib/postgresql/my_data
+    env_file:
+      - ../env/.env
+    ports:
+      - "5454:5432"
+    networks:
+      - servicenetwork
+
+## REDIS
+  redis:
+    image: redis:alpine
+    container_name: fastapi-2fa-cache
+    restart: always
+    env_file:
+      - ../env/.env
+    ports:
+      - "6389:6379"
+    networks:
+      - servicenetwork
+
+networks:
+    servicenetwork:
+        driver: bridge

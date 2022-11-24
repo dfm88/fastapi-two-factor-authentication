@@ -1,0 +1,5 @@
+.dockerignore
+**/.idea
+**/.venv
+**/venv
+**/logs
