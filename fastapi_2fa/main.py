@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+from fastapi_2fa.api.endpoints.api_v1.router import router
 
 from fastapi_2fa.core.config import settings
 
@@ -8,6 +9,9 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
+
+
+app.include_router(router=router, prefix=settings.API_V1_STR)
 
 
 # Set all CORS enabled origins

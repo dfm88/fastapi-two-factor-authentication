@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
-
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import false
 
 from fastapi_2fa.db.base_class import Base
+from fastapi_2fa.models.device import Device
 
 
 class User(Base):
@@ -11,7 +11,8 @@ class User(Base):
     full_name = Column(String, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    tfa_enabled = Column(Boolean, default=False)
+    tfa_enabled = Column(Boolean, server_default=false())
+    device = relationship(Device, back_populates="user", uselist=False, lazy="joined")
 
     def __repr__(self) -> str:
         return (

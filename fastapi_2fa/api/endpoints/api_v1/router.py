@@ -1,16 +1,8 @@
-from typing import Any
+from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi_2fa.api.endpoints.api_v1 import users
 
-from fastapi_2fa.api.deps.db import get_db
+router = APIRouter()
 
-
-user_router = APIRouter()
-
-
-@user_router.get('/users')
-async def get_user(
-    db: Session = Depends(get_db),
-) -> Any:
-    return {'user': 'ok'}
+# users
+router.include_router(users.user_router, prefix="/users", tags=["users"])

@@ -17,7 +17,7 @@ class BaseConfig(BaseSettings):
 
     ALGORITHM = os.environ.get('ALGORITHM')
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 h
 
     BACKEND_CORS_ORIGINS: AnyHttpUrl | list[AnyHttpUrl] = os.environ.get(
         "BACKEND_CORS_ORIGINS", "http://localhost:5555"
@@ -35,7 +35,7 @@ class BaseConfig(BaseSettings):
             scheme="postgresql",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
+            host=values.get("POSTGRES_HOST"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
 
