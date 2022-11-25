@@ -1,6 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects import postgresql
-
 from sqlalchemy.orm import relationship
 
 from fastapi_2fa.core import enums

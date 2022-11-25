@@ -11,12 +11,12 @@ class DeviceBase(BaseModel):
 
 # Properties to receive via API on creation
 class DeviceCreate(DeviceBase):
-    key: str
+    pass
 
 
 # Properties to receive via API on update
 class DeviceUpdate(DeviceBase):
-    key: Optional[str] = None
+    pass
 
 
 class DeviceInDBBase(DeviceBase):
@@ -24,3 +24,7 @@ class DeviceInDBBase(DeviceBase):
 
     class Config:
         orm_mode = True
+
+
+class DeviceInDb(DeviceInDBBase):
+    key: str

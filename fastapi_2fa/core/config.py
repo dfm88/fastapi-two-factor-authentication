@@ -15,8 +15,13 @@ class BaseConfig(BaseSettings):
     JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY")
     JWT_SECRET_KEY_REFRESH: str = os.environ.get("JWT_SECRET_KEY_REFRESH")
     PRE_TFA_SECRET_KEY: str = os.environ.get("PRE_TFA_SECRET_KEY")
+    ALGORITHM: str = os.environ.get("ALGORITHM")
 
-    ALGORITHM = os.environ.get("ALGORITHM")
+    FERNET_KEY_TFA_TOKEN: str = os.environ.get("FERNET_KEY_TFA_TOKEN")
+
+    TFA_BACKUP_TOKENS_NR: int = os.environ.get("TFA_BACKUP_TOKENS_NR")
+    TFA_TOKEN_LENGTH: int = os.environ.get("TFA_TOKEN_LENGTH")
+
     ACCESS_TOKEN_EXPIRE_MINUTES: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 15)
     REFRESH_TOKEN_EXPIRE_MINUTES: int = os.environ.get(
         "REFRESH_TOKEN_EXPIRE_MINUTES", 60 * 24
@@ -25,7 +30,7 @@ class BaseConfig(BaseSettings):
         "PRE_TFA_TOKEN_EXPIRE_MINUTES", 2
     )
 
-    BACKEND_CORS_ORIGINS: str | list[AnyHttpUrl] = os.environ.get(
+    BACKEND_CORS_ORIGINS: AnyHttpUrl | list[AnyHttpUrl] = os.environ.get(
         "BACKEND_CORS_ORIGINS", "http://localhost:5555"
     )
 
@@ -41,7 +46,7 @@ class BaseConfig(BaseSettings):
             scheme="postgresql",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
+            host=values.get("POSTGRES_HOST"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
 

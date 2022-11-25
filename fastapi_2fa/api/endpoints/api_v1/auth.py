@@ -1,6 +1,5 @@
 from typing import Any
 
-from core.enums import DeviceTypeEnum
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
@@ -9,10 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fastapi_2fa.api.deps.db import get_db
-from fastapi_2fa.api.deps.users import (
-    get_authenticated_user,
-    get_authenticated_user_pre_tfa,
-)
+from fastapi_2fa.api.deps.users import (get_authenticated_user,
+                                        get_authenticated_user_pre_tfa)
 from fastapi_2fa.core import security
 from fastapi_2fa.core.config import settings
 from fastapi_2fa.crud.users import user_crud
@@ -91,20 +88,6 @@ async def login_tfa(
     return user
 
 
-@auth_router.put(
-    "/enable_tfa",
-    summary="Enable two factor authentication for registered user",
-    response_model=UserOut,
-)
-async def enable_tfa(
-    device_type: DeviceTypeEnum,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_authenticated_user),
-) -> Any:
-    print(f"{device_type}")
-    return user
-
-
 @auth_router.post(
     "/test-token", summary="Test if the access token is ok", response_model=UserOut
 )
@@ -116,7 +99,9 @@ async def test_token(user: User = Depends(get_authenticated_user)):
 
 
 @auth_router.post("/refresh", summary="Refresh token", response_model=TokenSchema)
-async def refresh_token(db: Session = Depends(get_db), refresh_token: str = Body(...)):
+async def refresh_token(
+    db: Session = Depends(get_db), refresh_token: str = Body(embed=True, title='refresh token')
+):
     try:
         payload = jwt.decode(
             token=refresh_token,
@@ -137,6 +122,6 @@ async def refresh_token(db: Session = Depends(get_db), refresh_token: str = Body
             detail="Invalid token for user",
         )
     return {
-        "access_token": security.create_token(user.id),
-        "refresh_token": security.create_token(user.id, refresh=True),
+        "access_token": security.create_jwt_access_token(user.id),
+        "refresh_token": security.create_jwt_refresh_token(user.id),
     }
