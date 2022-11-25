@@ -22,16 +22,31 @@ class CrudBase(
         UpdateSchemaType,  # Pydantic Update Schema
     ]
 ):
-    def __init__(self, model: Type[ModelType]):
+    def __init__(self, model: Type[ModelType], transaction: bool = False):
         """
         CRUD object with default methods to Create, Read, Update, Delete (CRUD).
 
-        **Parameters**
-
-        * `model`: A SQLAlchemy model class
-        * `schema`: A Pydantic model (schema) class
+        Args:
+            model (Type[ModelType]): A SQLAlchemy model class
+            transaction (bool, optional): if True, changes won't be committed.
+                Defaults to False.
         """
+
         self.model = model
+        self.transaction = transaction
+
+    def __call__(self, transaction: bool) -> 'CrudBase':
+        self.transaction = transaction
+        return self
+
+    async def handle_commit(self, db: Session) -> bool:
+        committed = False
+        if not self.transaction:
+            print(f'{self} is NOT under transaction, committing..')
+            await db.commit()
+            committed = True
+        print(f'{self} is under transaction, NOT committing..')
+        return committed
 
     async def get(self, db: Session, id: Any) -> Optional[ModelType]:
         query = select(self.model).where(self.model.id == id)
@@ -49,12 +64,8 @@ class CrudBase(
         obj_in_data = jsonable_encoder(obj_in)
         db_obj: ModelType = self.model(**obj_in_data)
         db.add(db_obj)
-        try:
-            await db.commit()
-        except Exception:
-            await db.rollback()
-            raise
-        await db.refresh(db_obj)
+        if await self.handle_commit(db):
+            await db.refresh(db_obj)
         return db_obj
 
     async def update(
@@ -76,21 +87,11 @@ class CrudBase(
             .execution_options(synchronize_session="fetch")
         )
         await db.execute(query)
-        try:
-            # commit only if not under transaction
-            if not db.in_nested_transaction():
-                await db.commit()
-            return db_obj
-        except Exception as ex:
-            await db.rollback()
-            raise ex
+        if await self.handle_commit(db):
+            await db.refresh(db_obj)
+        return db_obj
 
     async def remove(self, db: Session, *, id: int) -> bool:
         query = delete(self.model).where(self.model.id == id)
         await db.execute(query)
-        try:
-            await db.commit()
-        except Exception as ex:
-            await db.rollback()
-            raise ex
-        return True
+        return self.handle_commit(db)

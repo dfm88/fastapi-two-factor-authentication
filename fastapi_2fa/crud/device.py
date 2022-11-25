@@ -10,28 +10,26 @@ from fastapi_2fa.schemas.device_schema import DeviceCreate, DeviceUpdate
 
 class DeviceCrud(CrudBase[Device, DeviceCreate, DeviceUpdate]):
 
-    @staticmethod
-    async def create(db: Session, device: DeviceCreate, user: User) -> Device:
+    async def create(
+        self, db: Session, device: DeviceCreate, user: User
+    ) -> tuple[Device, SvgImage | None]:
         # create device
+        encoded_key: str = create_encoded_two_factor_auth_key()
         db_device = Device(
-            key=create_encoded_two_factor_auth_key(),
-            user_id=user.id,
+            key=encoded_key,
+            user=user,
             device_type=device.device_type
         )
         # create backup tokens
         for token in get_fake_otp_tokens():
             token_db = BackupToken(
-                device_id=db_device.id,
+                device=db_device,
                 token=token
             )
             db_device.backup_tokens.append(token_db)
         db.add(db_device)
-        try:
-            await db.commit()
-        except Exception:
-            await db.rollback()
-            raise
-        return db_device
+        if await self.handle_commit(db):
+            await db.refresh(db_device)
 
 
 device_crud = DeviceCrud(model=Device)

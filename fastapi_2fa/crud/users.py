@@ -11,8 +11,8 @@ from fastapi_2fa.schemas.user_schema import UserCreate, UserUpdate
 
 
 class UserCrud(CrudBase[User, UserCreate, UserUpdate]):
-    @staticmethod
-    async def create(db: Session, user: UserCreate) -> User:
+
+    async def create(self, db: Session, user: UserCreate) -> User:
         db_obj = User(
             email=user.email,
             hashed_password=get_password_hash(user.password),
@@ -20,12 +20,8 @@ class UserCrud(CrudBase[User, UserCreate, UserUpdate]):
             full_name=user.full_name,
         )
         db.add(db_obj)
-        try:
-            await db.commit()
-        except Exception:
-            await db.rollback()
-            raise
-        await db.refresh(db_obj)
+        if await self.handle_commit(db):
+            await db.refresh(db_obj)
         return db_obj
 
     @staticmethod
