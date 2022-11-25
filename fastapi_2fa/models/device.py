@@ -21,9 +21,26 @@ class Device(Base):
         uselist=True,
     )
 
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__}("
+            f"id={self.id}, "
+            f"device_type={self.device_type}, "
+            f"user={self.user.full_name}, "
+            f")>"
+        )
+
 
 class BackupToken(Base):
     id = Column(Integer, primary_key=True, index=True)
     device_id = Column(Integer, ForeignKey("device.id"))
-    device = relationship("Device", back_populates="backup_tokens", uselist=True)
+    device = relationship("Device", back_populates="backup_tokens", uselist=False)
     token = Column(String(length=8))
+
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__}("
+            f"id={self.id}, "
+            f"device={self.device}, "
+            f")>"
+        )

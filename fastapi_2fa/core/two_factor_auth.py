@@ -1,7 +1,9 @@
+import io
 import random
 from typing import Iterator
 
 import pyotp
+import qrcode
 from fernet import Fernet
 
 from fastapi_2fa.core.config import settings
@@ -43,3 +45,14 @@ def get_fake_otp_tokens(
             str(random.randint(0, 9)) for _ in range(nr_digits)
         )
         yield random_otp
+
+def qr_code_from_key(encoded_key: str, user_email: str):
+    decoded_key = _fernet_decode(value=encoded_key)
+    qrcode_key = pyotp.TOTP(
+        decoded_key, interval=settings.TOTP_TOKEN_DURATION
+    ).provisioning_uri(user_email, issuer_name=settings.TOTP_ISSUER_NAME)
+    img = qrcode.make(qrcode_key)
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer

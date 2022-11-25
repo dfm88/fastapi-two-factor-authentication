@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
+from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 from pydantic import ValidationError
@@ -12,6 +13,9 @@ from fastapi_2fa.api.deps.users import (get_authenticated_user,
                                         get_authenticated_user_pre_tfa)
 from fastapi_2fa.core import security
 from fastapi_2fa.core.config import settings
+from fastapi_2fa.core.enums import DeviceTypeEnum
+from fastapi_2fa.core.utils import send_backup_tokens
+from fastapi_2fa.crud.device import device_crud
 from fastapi_2fa.crud.users import user_crud
 from fastapi_2fa.models.users import User
 from fastapi_2fa.schemas.token_schema import TokenPayload, TokenSchema
@@ -20,20 +24,50 @@ from fastapi_2fa.schemas.user_schema import UserCreate, UserOut
 auth_router = APIRouter()
 
 
-@auth_router.post("/signup", summary="Create user", response_model=UserOut)
+@auth_router.post(
+    "/signup",
+    summary="Create user",
+    responses={
+        200: {
+            "content": {"image/png": {}},
+            "description": "Returns no content or a qr code "
+                           "if tfas is enabled and device_type "
+                           "is 'code_generator'",
+        }
+    },
+)
 async def signup(
-    db: Session = Depends(get_db), form_data: UserCreate = Depends()
+    db: Session = Depends(get_db), user_data: UserCreate = Depends()
 ) -> Any:
     try:
-        user = await user_crud.create(
+        # async with db.begin_nested():
+        user = await user_crud(transaction=True).create(
             db=db,
-            user=form_data,
+            user=user_data,
         )
-        return user
+        # raise Exception
+        if user_data.tfa_enabled:
+            device, qr_code = await device_crud(transaction=True).create(
+                db=db,
+                device=user_data.device,
+                user=user
+            )
+            send_backup_tokens(user=user, device=device)
+
+            if device.device_type == DeviceTypeEnum.CODE_GENERATOR:
+                return StreamingResponse(content=qr_code, media_type="image/png")
+
+        return Response(status_code=status.HTTP_200_OK)
+
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'User with email "{form_data.email}" already exists',
+            detail=f'User with email `{user_data.email}` already exists',
+        )
+    except Exception as ex:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(ex),
         )
 
 

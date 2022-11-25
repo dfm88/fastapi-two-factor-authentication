@@ -3,7 +3,8 @@ from functools import lru_cache
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
-from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+from pydantic import (AnyHttpUrl, BaseSettings, EmailStr, Field, PostgresDsn,
+                      validator)
 
 load_dotenv(dotenv_path="./env/.env")
 
@@ -11,6 +12,8 @@ load_dotenv(dotenv_path="./env/.env")
 class BaseConfig(BaseSettings):
     API_V1_STR: str = os.environ.get("API_V1_STR")
     PROJECT_NAME: str = os.environ.get("PROJECT_NAME")
+
+    FAKE_EMAIL_SENDER: EmailStr = os.environ.get("FAKE_EMAIL_SENDER")
 
     JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY")
     JWT_SECRET_KEY_REFRESH: str = os.environ.get("JWT_SECRET_KEY_REFRESH")
@@ -21,6 +24,15 @@ class BaseConfig(BaseSettings):
 
     TFA_BACKUP_TOKENS_NR: int = os.environ.get("TFA_BACKUP_TOKENS_NR")
     TFA_TOKEN_LENGTH: int = os.environ.get("TFA_TOKEN_LENGTH")
+    TOTP_ISSUER_NAME: str = os.environ.get("TOTP_ISSUER_NAME")
+    # default tolerance = 30 sec
+    # this number is multiplied for 30 sec to increas it.
+    # -->MAX = 10 => 5 minutes
+    TOTP_TOKEN_DURATION: int = Field(
+        default=os.environ.get("TOTP_TOKEN_DURATION", 2),
+        gt=0,
+        le=10
+    )
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 15)
     REFRESH_TOKEN_EXPIRE_MINUTES: int = os.environ.get(

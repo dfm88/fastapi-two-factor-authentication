@@ -1,8 +1,9 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from fastapi import HTTPException, status
+from pydantic import BaseModel, EmailStr, root_validator
 
-from fastapi_2fa.schemas.device_schema import DeviceInDBBase
+from fastapi_2fa.schemas.device_schema import DeviceCreate, DeviceInDBBase
 
 
 # Shared properties
@@ -20,6 +21,17 @@ class UserLogin(BaseModel):
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     password: str
+    device: Optional[DeviceCreate] = None
+
+    @root_validator(pre=True)
+    def check_device_if_tfa_enabled(cls, values):
+        if values['tfa_enabled'] and values['device'] is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                'when enabling two factor authentication, '
+                'also a device_type should be provided'
+            )
+        return values
 
 
 # Properties to receive via API on update

@@ -18,6 +18,8 @@ class User(Base):
         return (
             f"<{self.__class__.__name__}("
             f"id={self.id}, "
+            f"email={self.email}, "
+            f"tfa={self.tfa_enabled}, "
             f"full_name={self.full_name}, "
             f")>"
         )

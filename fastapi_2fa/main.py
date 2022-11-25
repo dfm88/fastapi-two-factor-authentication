@@ -11,6 +11,7 @@ app = FastAPI(
 )
 
 
+# routers
 app.include_router(router=router, prefix=settings.API_V1_STR)
 
 

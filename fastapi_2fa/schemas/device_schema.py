@@ -1,7 +1,8 @@
 from typing import Optional
 
-from core.enums import DeviceTypeEnum
 from pydantic import BaseModel
+
+from fastapi_2fa.core.enums import DeviceTypeEnum
 
 
 # Shared properties
