@@ -46,10 +46,20 @@ def get_fake_otp_tokens(
         )
         yield random_otp
 
+
+def verify_token(user: User, token:str) -> bool:
+    assert user.tfa_enabled is True, 'User does not have TFA enabled'
+    assert user.device is not None, 'User has no associated device'
+    decoded_key = _fernet_decode(value=user.device.key)
+    totp = pyotp.TOTP(decoded_key)
+    result =  totp.verify(token, valid_window=settings.TOTP_TOKEN_TOLERANCE)
+    return result
+
+
 def qr_code_from_key(encoded_key: str, user_email: str):
     decoded_key = _fernet_decode(value=encoded_key)
     qrcode_key = pyotp.TOTP(
-        decoded_key, interval=settings.TOTP_TOKEN_DURATION
+        decoded_key, interval=settings.TOTP_TOKEN_TOLERANCE
     ).provisioning_uri(user_email, issuer_name=settings.TOTP_ISSUER_NAME)
     img = qrcode.make(qrcode_key)
     buffer = io.BytesIO()

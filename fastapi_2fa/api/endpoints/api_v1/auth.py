@@ -15,10 +15,11 @@ from fastapi_2fa.core import security
 from fastapi_2fa.core.config import settings
 from fastapi_2fa.core.enums import DeviceTypeEnum
 from fastapi_2fa.core.utils import send_backup_tokens
+from fastapi_2fa.core.two_factor_auth import verify_token
 from fastapi_2fa.crud.device import device_crud
 from fastapi_2fa.crud.users import user_crud
 from fastapi_2fa.models.users import User
-from fastapi_2fa.schemas.token_schema import TokenPayload, TokenSchema
+from fastapi_2fa.schemas.token_schema import TokenPayload, TokenSchema, PreTfaTokenSchema
 from fastapi_2fa.schemas.user_schema import UserCreate, UserOut
 
 auth_router = APIRouter()
@@ -75,7 +76,7 @@ async def signup(
     "/login",
     summary="Create access and refresh tokens for user",
     status_code=status.HTTP_200_OK,
-    response_model=TokenSchema,
+    response_model=TokenSchema | PreTfaTokenSchema,
 )
 async def login(
     response: Response,
@@ -96,7 +97,7 @@ async def login(
     # verify 2 factor authentication
     if user_crud.is_tfa_enabled(user=user):
         response.status_code = status.HTTP_202_ACCEPTED
-        return TokenSchema(
+        return PreTfaTokenSchema(
             access_token=security.create_pre_tfa_token(user.id),
             refresh_token=None,
         )
@@ -110,16 +111,24 @@ async def login(
 
 @auth_router.post(
     "/login/tfa",
-    summary="Verify two factor authenticazion token",
-    response_model=UserOut,
+    summary="Verify two factor authentication token",
+    response_model=TokenSchema,
 )
 async def login_tfa(
     tfa_token: str,
     db: Session = Depends(get_db),
     user: User = Depends(get_authenticated_user_pre_tfa),
 ) -> Any:
-    print(f"{tfa_token}")
-    return user
+    if verify_token(user=user, token=tfa_token):
+        return TokenSchema(
+            access_token=security.create_jwt_access_token(user.id),
+            refresh_token=security.create_jwt_refresh_token(user.id),
+        )
+    
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="TOTP token mismatch"
+    )
 
 
 @auth_router.post(

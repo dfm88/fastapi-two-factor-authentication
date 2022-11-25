@@ -41,6 +41,7 @@ class BackupToken(Base):
         return (
             f"<{self.__class__.__name__}("
             f"id={self.id}, "
+            f"token={self.token}, "
             f"device={self.device}, "
             f")>"
         )

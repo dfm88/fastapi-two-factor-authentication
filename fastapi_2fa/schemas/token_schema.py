@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class TokenSchema(BaseModel):
     access_token: str
-    refresh_token: str | None
+    refresh_token: str
 
 
 class TokenPayload(BaseModel):
@@ -11,5 +11,5 @@ class TokenPayload(BaseModel):
     exp: int = None
 
 
-class PreTfaTokenSchema(BaseModel):
-    pre_tfa_token: str
+class PreTfaTokenSchema(TokenSchema):
+    refresh_token: None

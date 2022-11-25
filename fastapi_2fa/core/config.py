@@ -28,8 +28,8 @@ class BaseConfig(BaseSettings):
     # default tolerance = 30 sec
     # this number is multiplied for 30 sec to increas it.
     # -->MAX = 10 => 5 minutes
-    TOTP_TOKEN_DURATION: int = Field(
-        default=os.environ.get("TOTP_TOKEN_DURATION", 2),
+    TOTP_TOKEN_TOLERANCE: int = Field(
+        default=os.environ.get("TOTP_TOKEN_TOLERANCE", 2),
         gt=0,
         le=10
     )

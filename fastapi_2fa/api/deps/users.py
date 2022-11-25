@@ -20,7 +20,8 @@ async def _get_user_from_jwt(
     token: str,
     db: Session,
     expire_err_message: str = "Token expired",
-    jwt_err_message: str = "Could not validate credentials",
+    jwt_err_message: str = "Could not validate credentials, "
+                           "if TFA is enabled, please confirm token first",
 ):
     try:
         payload = jwt.decode(token=token, key=key, algorithms=[settings.ALGORITHM])
