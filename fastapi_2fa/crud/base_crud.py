@@ -68,6 +68,7 @@ class CrudBase(
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
+
         query = (
             update(self.model)
             .where(self.model.id == db_obj.id)

@@ -2,18 +2,23 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
+from fastapi_2fa.schemas.device_schema import DeviceInDBBase
+
 
 # Shared properties
 class UserBase(BaseModel):
-    email: Optional[EmailStr] = None
-    tfa_enabled: Optional[bool] = True
-    is_superuser: bool = False
-    full_name: Optional[str] = None
+    email: EmailStr
+    tfa_enabled: Optional[bool] = False
+    full_name: str
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    email: EmailStr
     password: str
 
 
@@ -24,6 +29,7 @@ class UserUpdate(UserBase):
 
 class UserInDBBase(UserBase):
     id: Optional[int] = None
+    device: Optional[DeviceInDBBase] = None
 
     class Config:
         orm_mode = True

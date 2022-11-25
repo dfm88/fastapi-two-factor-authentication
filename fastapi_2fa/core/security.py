@@ -17,29 +17,16 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return pwd_context.verify(password, hashed_password)
 
 
-def create_token(
-    subject: str | Any,
-    refresh: bool = False,
-    expires_delta: int = None
+def _create_token(
+    subject: int | Any,
+    expire_minutes: int,
+    key: str,
 ) -> str:
-    """
-    Create access or refresh token
-    """
-    if expires_delta is not None:
-        expires_delta = datetime.utcnow() + expires_delta
-    else:
-        minutes = settings.REFRESH_TOKEN_EXPIRE_MINUTES if refresh \
-            else settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        expires_delta = datetime.utcnow() + timedelta(
-            minutes=minutes
-        )
+    expires_delta = datetime.utcnow() + timedelta(minutes=expire_minutes)
     to_encode = {
         "sub": str(subject),
         "exp": expires_delta,
     }
-
-    key = settings.JWT_SECRET_KEY_REFRESH if refresh \
-        else settings.JWT_SECRET_KEY
 
     encoded_jwt = jwt.encode(
         claims=to_encode,
@@ -47,3 +34,27 @@ def create_token(
         algorithm=settings.ALGORITHM,
     )
     return encoded_jwt
+
+
+def create_jwt_access_token(subject: int | Any) -> str:
+    return _create_token(
+        subject=subject,
+        expire_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+        key=settings.JWT_SECRET_KEY,
+    )
+
+
+def create_jwt_refresh_token(subject: int | Any) -> str:
+    return _create_token(
+        subject=subject,
+        expire_minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES,
+        key=settings.JWT_SECRET_KEY_REFRESH,
+    )
+
+
+def create_pre_tfa_token(subject: int | Any) -> str:
+    return _create_token(
+        subject=subject,
+        expire_minutes=settings.PRE_TFA_TOKEN_EXPIRE_MINUTES,
+        key=settings.PRE_TFA_SECRET_KEY,
+    )
