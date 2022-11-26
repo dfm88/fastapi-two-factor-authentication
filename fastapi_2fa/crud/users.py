@@ -54,5 +54,4 @@ class UserCrud(CrudBase[User, UserCreate, UserUpdate]):
         return model_instance
 
 
-
 user_crud = UserCrud(model=User)

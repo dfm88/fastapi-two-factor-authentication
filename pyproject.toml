@@ -29,6 +29,8 @@ nest-asyncio = "^1.5.6"
 fernet = "^1.0.1"
 qrcode = {extras = ["pil"], version = "^7.3.1"}
 pillow = "^9.3.0"
+redis = "^4.3.5"
+flower = "1.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -75,6 +75,6 @@ ENV PATH /${IMAGE_NAME}/venv/bin:$PATH
 WORKDIR /${IMAGE_NAME}
 COPY . ./
 
-RUN chmod +x /${IMAGE_NAME}/docker/entrypoint.sh
+RUN chmod +x /${IMAGE_NAME}/scripts/entrypoint.sh
 
-ENTRYPOINT ["sh", "/docker/entrypoint.sh"]
+ENTRYPOINT ["sh", "scripts/entrypoint.sh"]

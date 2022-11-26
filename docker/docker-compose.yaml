@@ -13,10 +13,13 @@ services:
       - ./data/pgdata:/var/lib/postgresql/my_data
     env_file:
       - ../env/.env
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
+      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
+      - result_backend=redis://fastapi-2fa-cache:6379/0
+
     ports:
       - "5454:5432"
-    networks:
-      - servicenetwork
 
 ## REDIS
   redis:
@@ -25,11 +28,62 @@ services:
     restart: always
     env_file:
       - ../env/.env
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
+      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
+      - result_backend=redis://fastapi-2fa-cache:6379/0
     ports:
       - "6389:6379"
-    networks:
-      - servicenetwork
 
-networks:
-    servicenetwork:
-        driver: bridge
+  rabbitmq:
+    container_name: fastapi-2fa-rabbitmq
+    image: rabbitmq:3-management
+    env_file:
+      - ../env/.env
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
+      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
+      - result_backend=redis://fastapi-2fa-cache:6379/0
+    ports:
+      - "5672:5672"
+
+  celery_worker:
+    container_name: fastapi-2fa-celery
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    image: fastapi_2fa_celery_worker
+    entrypoint: /scripts/start_celery_worker.sh
+    env_file:
+      - ../env/.env
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
+      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
+      - result_backend=redis://fastapi-2fa-cache:6379/0
+    depends_on:
+        - redis
+        - db
+        - rabbitmq
+
+  flower:
+    container_name: fastapi-2fa-flower
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    image: fastapi_2fa_celery_flower
+    entrypoint: /scripts/start_celery_flower.sh
+    volumes:
+        - flower_db:/app/flower_db
+    env_file:
+      - ../env/.env
+    ports:
+      - 5557:5557
+    depends_on:
+        - redis
+        - db
+        - rabbitmq
+        - celery_worker
+
+volumes:
+   pgdata:
+   flower_db:

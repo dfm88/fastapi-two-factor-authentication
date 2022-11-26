@@ -15,13 +15,21 @@ class BaseConfig(BaseSettings):
 
     FAKE_EMAIL_SENDER: EmailStr = os.environ.get("FAKE_EMAIL_SENDER")
 
+    # # JWT
     JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY")
     JWT_SECRET_KEY_REFRESH: str = os.environ.get("JWT_SECRET_KEY_REFRESH")
     PRE_TFA_SECRET_KEY: str = os.environ.get("PRE_TFA_SECRET_KEY")
     ALGORITHM: str = os.environ.get("ALGORITHM")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 15)
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = os.environ.get(
+        "REFRESH_TOKEN_EXPIRE_MINUTES", 60 * 24
+    )  # 24 h
 
+    # # 2 FACTOR AUTHENTICATION
     FERNET_KEY_TFA_TOKEN: str = os.environ.get("FERNET_KEY_TFA_TOKEN")
-
+    PRE_TFA_TOKEN_EXPIRE_MINUTES: int = os.environ.get(
+        "PRE_TFA_TOKEN_EXPIRE_MINUTES", 2
+    )
     TFA_BACKUP_TOKENS_NR: int = os.environ.get("TFA_BACKUP_TOKENS_NR")
     TFA_TOKEN_LENGTH: int = os.environ.get("TFA_TOKEN_LENGTH")
     TOTP_ISSUER_NAME: str = os.environ.get("TOTP_ISSUER_NAME")
@@ -34,18 +42,12 @@ class BaseConfig(BaseSettings):
         le=10
     )
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 15)
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = os.environ.get(
-        "REFRESH_TOKEN_EXPIRE_MINUTES", 60 * 24
-    )  # 24 h
-    PRE_TFA_TOKEN_EXPIRE_MINUTES: int = os.environ.get(
-        "PRE_TFA_TOKEN_EXPIRE_MINUTES", 2
-    )
-
+    # # CORS
     BACKEND_CORS_ORIGINS: AnyHttpUrl | list[AnyHttpUrl] = os.environ.get(
         "BACKEND_CORS_ORIGINS", "http://localhost:5555"
     )
 
+    # # DB
     SQLALCHEMY_DATABASE_URI: str = os.environ.get("SQLALCHEMY_DATABASE_URI")
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -61,6 +63,16 @@ class BaseConfig(BaseSettings):
             host=values.get("POSTGRES_HOST"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
+
+    # # CELERY
+    CELERY_BROKER_URL: str = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+    result_backend: str = os.environ.get("result_backend", "redis://redis:6379/0")
+    CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+    # Celery ACK the queue only when task is completed
+    CELERY_TASK_ACKS_LATE = True
+    imports = ("fastapi_2fa.tasks.tasks",)
+    task_serializer = "pickle"
+    accept_content = ('pickle', 'json',)
 
     class Config:
         case_sensitive = True
