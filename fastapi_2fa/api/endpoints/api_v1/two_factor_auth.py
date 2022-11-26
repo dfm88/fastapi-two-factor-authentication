@@ -5,13 +5,13 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from fastapi_2fa.api.deps.db import get_db
-from fastapi_2fa.api.deps.users import (get_authenticated_user,
+from fastapi_2fa.api.deps.users import (get_authenticated_tfa_user,
+                                        get_authenticated_user,
                                         get_authenticated_user_pre_tfa)
 from fastapi_2fa.core import security
 from fastapi_2fa.core.enums import DeviceTypeEnum
 from fastapi_2fa.core.two_factor_auth import (qr_code_from_key,
-                                              verify_backup_token,
-                                              verify_token)
+                                              verify_backup_token)
 from fastapi_2fa.core.utils import send_mail_backup_tokens
 from fastapi_2fa.crud.backup_token import backup_token_crud
 from fastapi_2fa.crud.device import device_crud
@@ -32,17 +32,11 @@ tfa_router = APIRouter()
 async def login_tfa(
     tfa_token: str,
     db: Session = Depends(get_db),
-    user: User = Depends(get_authenticated_user_pre_tfa),
+    user: User = Depends(get_authenticated_tfa_user),
 ) -> Any:
-    if verify_token(user=user, token=tfa_token):
-        return JwtTokenSchema(
-            access_token=security.create_jwt_access_token(user.id),
-            refresh_token=security.create_jwt_refresh_token(user.id),
-        )
-
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="TOTP token mismatch"
+    return JwtTokenSchema(
+        access_token=security.create_jwt_access_token(user.id),
+        refresh_token=security.create_jwt_refresh_token(user.id),
     )
 
 

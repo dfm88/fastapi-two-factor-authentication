@@ -31,20 +31,26 @@ class Email:
 
 
 def send_mail_backup_tokens(user: User, device: Device) -> AsyncResult:
-    email_ob = Email(
+    email_obj = Email(
         to_=[user.email],
         from_=settings.FAKE_EMAIL_SENDER,
         text_=f"Backup tokens : {device.backup_tokens}"
     )
-    task = send_email_task.apply_async(kwargs={'email': email_ob.to_json()})
+    print(
+        f"Sending email task to celery, email:\n\n***\n{email_obj.text_}\n***\n"
+    )
+    task = send_email_task.apply_async(kwargs={'email': email_obj.to_json()})
     return task
 
 
 def send_mail_totp_token(user: User, token: str) -> AsyncResult:
-    email_ob = Email(
+    email_obj = Email(
         to_=[user.email],
         from_=settings.FAKE_EMAIL_SENDER,
         text_=f"Access TOTP token : {token}"
     )
-    task = send_email_task.apply_async(kwargs={'email': email_ob.to_json()})
+    print(
+        f"Sending email task to celery, email:\n\n***\n{email_obj.text_}\n***\n"
+    )
+    task = send_email_task.apply_async(kwargs={'email': email_obj.to_json()})
     return task

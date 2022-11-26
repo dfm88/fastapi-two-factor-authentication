@@ -15,3 +15,4 @@ async def get_db() -> Generator:
     finally:
         print('closing db...')
         await db.close()
+        print('..db closed!')

@@ -42,12 +42,10 @@ async def signup(
     db: Session = Depends(get_db), user_data: UserCreate = Depends()
 ) -> Any:
     try:
-        # async with db.begin_nested():
         user = await user_crud(transaction=True).create(
             db=db,
             user=user_data,
         )
-        # raise Exception
         if user_data.tfa_enabled:
             device, qr_code = await device_crud(transaction=True).create(
                 db=db,
@@ -78,6 +76,17 @@ async def signup(
     summary="Create access and refresh tokens for user",
     status_code=status.HTTP_200_OK,
     response_model=JwtTokenSchema | PreTfaJwtTokenSchema,
+    responses={
+        200: {
+            "description": "Credentials ok and TFA disabled",
+        },
+        202: {
+            "description": "Credentials ok and TFA enabled",
+        },
+        401: {
+            "description": "Invalid credentials",
+        },
+    }
 )
 async def login(
     response: Response,
@@ -91,7 +100,7 @@ async def login(
     # wrong credentials
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
 
@@ -115,7 +124,9 @@ async def login(
 
 
 @auth_router.get(
-    "/test-token", summary="Test if the access token is ok", response_model=UserOut
+    "/test-token",
+    summary="Authenticated endpoint to test if access token is ok",
+    response_model=UserOut
 )
 async def test_token(user: User = Depends(get_authenticated_user)):
     """
@@ -124,7 +135,11 @@ async def test_token(user: User = Depends(get_authenticated_user)):
     return user
 
 
-@auth_router.post("/refresh", summary="Refresh token", response_model=JwtTokenSchema)
+@auth_router.post(
+    "/refresh",
+    summary="Refresh token for elapsed access token",
+    response_model=JwtTokenSchema
+)
 async def refresh_token(
     db: Session = Depends(get_db), refresh_token: str = Body(embed=True, title='refresh token')
 ):

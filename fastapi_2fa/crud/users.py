@@ -29,6 +29,7 @@ class UserCrud(CrudBase[User, UserCreate, UserUpdate]):
         user: User = await UserCrud.get_by_email(db=db, email=email)
         if not user:
             return None
+        user = user[0]
         if not verify_password(password=password, hashed_password=user.hashed_password):
             return None
         return user
@@ -50,7 +51,7 @@ class UserCrud(CrudBase[User, UserCreate, UserUpdate]):
     async def get_by_email(db: Session, email: EmailStr) -> User | None:
         query = select(User).where(User.email == email)
         model_query = await db.execute(query)
-        (model_instance,) = model_query.first()
+        model_instance = model_query.first()
         return model_instance
 
 

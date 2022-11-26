@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from fastapi_2fa.api.deps.db import get_db
 from fastapi_2fa.core.config import settings
+from fastapi_2fa.core.two_factor_auth import verify_token
 from fastapi_2fa.crud.users import user_crud
 from fastapi_2fa.models.users import User
 from fastapi_2fa.schemas.jwt_token_schema import JwtTokenPayload
@@ -68,4 +69,18 @@ async def get_authenticated_user_pre_tfa(
         expire_err_message="Token expired, login again "
         "and validate TFA token within "
         f"{settings.PRE_TFA_TOKEN_EXPIRE_MINUTES} minutes",
+    )
+
+
+async def get_authenticated_tfa_user(
+    tfa_token: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_authenticated_user_pre_tfa)
+) -> User:
+    if verify_token(user=user, token=tfa_token):
+        return user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="TOTP token mismatch"
     )
