@@ -8,7 +8,7 @@ from fastapi_2fa.api.deps.db import get_db
 from fastapi_2fa.core.config import settings
 from fastapi_2fa.crud.users import user_crud
 from fastapi_2fa.models.users import User
-from fastapi_2fa.schemas.token_schema import TokenPayload
+from fastapi_2fa.schemas.jwt_token_schema import JwtTokenPayload
 
 reuseable_oauth = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login", scheme_name="JWT"
@@ -25,7 +25,7 @@ async def _get_user_from_jwt(
 ):
     try:
         payload = jwt.decode(token=token, key=key, algorithms=[settings.ALGORITHM])
-        token_data = TokenPayload(**payload)
+        token_data = JwtTokenPayload(**payload)
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

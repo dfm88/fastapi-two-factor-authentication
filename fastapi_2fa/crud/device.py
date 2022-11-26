@@ -4,9 +4,11 @@ from sqlalchemy.orm import Session
 from fastapi_2fa.core.enums import DeviceTypeEnum
 from fastapi_2fa.core.two_factor_auth import (
     create_encoded_two_factor_auth_key, get_fake_otp_tokens, qr_code_from_key)
+from fastapi_2fa.crud.backup_token import backup_token_crud
 from fastapi_2fa.crud.base_crud import CrudBase
-from fastapi_2fa.models.device import BackupToken, Device
+from fastapi_2fa.models.device import Device
 from fastapi_2fa.models.users import User
+from fastapi_2fa.schemas.backup_token_schema import BackupTokenCreate
 from fastapi_2fa.schemas.device_schema import DeviceCreate, DeviceUpdate
 
 
@@ -24,10 +26,13 @@ class DeviceCrud(CrudBase[Device, DeviceCreate, DeviceUpdate]):
         )
         # create backup tokens
         for token in get_fake_otp_tokens():
-            token_db = BackupToken(
-                device=db_device,
-                token=token
+            backup_token_schema = BackupTokenCreate(
+                token=token,
+                device_id=db_device.id
             )
+            token_db = await backup_token_crud(
+                transaction=self.transaction
+            ).create(db=db, obj_in=backup_token_schema)
             db_device.backup_tokens.append(token_db)
         db.add(db_device)
         if await self.handle_commit(db):

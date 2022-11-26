@@ -53,9 +53,6 @@ class UserCrud(CrudBase[User, UserCreate, UserUpdate]):
         (model_instance,) = model_query.first()
         return model_instance
 
-    @staticmethod
-    def is_tfa_enabled(user: User) -> bool:
-        return user.tfa_enabled
 
 
 user_crud = UserCrud(model=User)

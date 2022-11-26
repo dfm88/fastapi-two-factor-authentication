@@ -22,7 +22,7 @@ class Email:
         )
 
 
-def send_backup_tokens(user: User, device: Device):
+def send_mail_backup_tokens(user: User, device: Device):
     email_ob = Email(
         to_=[user.email],
         from_=settings.FAKE_EMAIL_SENDER,
@@ -31,7 +31,7 @@ def send_backup_tokens(user: User, device: Device):
     send_email(email=email_ob)
 
 
-def send_totp_token(user: User, token: str):
+def send_mail_totp_token(user: User, token: str):
     email_ob = Email(
         to_=[user.email],
         from_=settings.FAKE_EMAIL_SENDER,

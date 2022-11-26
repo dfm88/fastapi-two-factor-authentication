@@ -7,6 +7,10 @@ import qrcode
 from fernet import Fernet
 
 from fastapi_2fa.core.config import settings
+from fastapi_2fa.core.enums import DeviceTypeEnum
+from fastapi_2fa.core.utils import send_mail_totp_token
+from fastapi_2fa.models.device import BackupToken
+from fastapi_2fa.models.users import User
 
 ENCODING = 'utf-8'
 
@@ -47,13 +51,50 @@ def get_fake_otp_tokens(
         yield random_otp
 
 
-def verify_token(user: User, token:str) -> bool:
+
+def get_current_totp(user: User) -> pyotp.TOTP:
     assert user.tfa_enabled is True, 'User does not have TFA enabled'
     assert user.device is not None, 'User has no associated device'
     decoded_key = _fernet_decode(value=user.device.key)
-    totp = pyotp.TOTP(decoded_key)
-    result =  totp.verify(token, valid_window=settings.TOTP_TOKEN_TOLERANCE)
+    return pyotp.TOTP(decoded_key)
+
+
+def verify_token(user: User, token: str) -> bool:
+    totp: pyotp.TOTP = get_current_totp(user=user)
+    result = totp.verify(token, valid_window=settings.TOTP_TOKEN_TOLERANCE)
     return result
+
+
+def verify_backup_token(
+    backup_tokens: list[BackupToken], tfa_backup_token: str
+) -> BackupToken | None:
+    """Checks between "backup_tokens" if there is the "tfa_backup_token"
+
+    Args:
+        backup_tokens list[BackupToken]
+        tfa_backup_token (str)
+
+    Returns:
+        BackupToken | None: the matched BackupToken or None if no backup tokens matched
+    """
+    for bkp_token in backup_tokens:
+        if bkp_token.token == tfa_backup_token:
+            # consume backup token and return access jwt
+            print('Found backup token match..')
+            return bkp_token
+
+
+def send_tfa_token(
+    user: User,
+    device_type: DeviceTypeEnum
+) -> None:
+    if device_type == DeviceTypeEnum.EMAIL:
+        totp: pyotp.TOTP = get_current_totp(user=user)
+        current_totp = totp.now()
+        send_mail_totp_token(
+            user=user,
+            token=current_totp
+        )
 
 
 def qr_code_from_key(encoded_key: str, user_email: str):

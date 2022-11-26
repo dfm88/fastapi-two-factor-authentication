@@ -9,17 +9,18 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fastapi_2fa.api.deps.db import get_db
-from fastapi_2fa.api.deps.users import (get_authenticated_user,
-                                        get_authenticated_user_pre_tfa)
+from fastapi_2fa.api.deps.users import get_authenticated_user
 from fastapi_2fa.core import security
 from fastapi_2fa.core.config import settings
 from fastapi_2fa.core.enums import DeviceTypeEnum
-from fastapi_2fa.core.utils import send_backup_tokens
-from fastapi_2fa.core.two_factor_auth import verify_token
+from fastapi_2fa.core.two_factor_auth import send_tfa_token
+from fastapi_2fa.core.utils import send_mail_backup_tokens
 from fastapi_2fa.crud.device import device_crud
 from fastapi_2fa.crud.users import user_crud
 from fastapi_2fa.models.users import User
-from fastapi_2fa.schemas.token_schema import TokenPayload, TokenSchema, PreTfaTokenSchema
+from fastapi_2fa.schemas.jwt_token_schema import (JwtTokenPayload,
+                                                  JwtTokenSchema,
+                                                  PreTfaJwtTokenSchema)
 from fastapi_2fa.schemas.user_schema import UserCreate, UserOut
 
 auth_router = APIRouter()
@@ -53,7 +54,7 @@ async def signup(
                 device=user_data.device,
                 user=user
             )
-            send_backup_tokens(user=user, device=device)
+            send_mail_backup_tokens(user=user, device=device)
 
             if device.device_type == DeviceTypeEnum.CODE_GENERATOR:
                 return StreamingResponse(content=qr_code, media_type="image/png")
@@ -76,7 +77,7 @@ async def signup(
     "/login",
     summary="Create access and refresh tokens for user",
     status_code=status.HTTP_200_OK,
-    response_model=TokenSchema | PreTfaTokenSchema,
+    response_model=JwtTokenSchema | PreTfaJwtTokenSchema,
 )
 async def login(
     response: Response,
@@ -94,44 +95,26 @@ async def login(
             detail="Incorrect email or password",
         )
 
-    # verify 2 factor authentication
-    if user_crud.is_tfa_enabled(user=user):
+    # handle users with tfa enabled
+    if user.tfa_enabled:
+        send_tfa_token(
+            user=user,
+            device_type=user.device.device_type
+        )
         response.status_code = status.HTTP_202_ACCEPTED
-        return PreTfaTokenSchema(
+        return PreTfaJwtTokenSchema(
             access_token=security.create_pre_tfa_token(user.id),
             refresh_token=None,
         )
 
     # create access and refresh tokens
-    return TokenSchema(
+    return JwtTokenSchema(
         access_token=security.create_jwt_access_token(user.id),
         refresh_token=security.create_jwt_refresh_token(user.id),
     )
 
 
-@auth_router.post(
-    "/login/tfa",
-    summary="Verify two factor authentication token",
-    response_model=TokenSchema,
-)
-async def login_tfa(
-    tfa_token: str,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_authenticated_user_pre_tfa),
-) -> Any:
-    if verify_token(user=user, token=tfa_token):
-        return TokenSchema(
-            access_token=security.create_jwt_access_token(user.id),
-            refresh_token=security.create_jwt_refresh_token(user.id),
-        )
-    
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="TOTP token mismatch"
-    )
-
-
-@auth_router.post(
+@auth_router.get(
     "/test-token", summary="Test if the access token is ok", response_model=UserOut
 )
 async def test_token(user: User = Depends(get_authenticated_user)):
@@ -141,7 +124,7 @@ async def test_token(user: User = Depends(get_authenticated_user)):
     return user
 
 
-@auth_router.post("/refresh", summary="Refresh token", response_model=TokenSchema)
+@auth_router.post("/refresh", summary="Refresh token", response_model=JwtTokenSchema)
 async def refresh_token(
     db: Session = Depends(get_db), refresh_token: str = Body(embed=True, title='refresh token')
 ):
@@ -151,7 +134,7 @@ async def refresh_token(
             key=settings.JWT_SECRET_KEY_REFRESH,
             algorithms=[settings.ALGORITHM],
         )
-        token_data = TokenPayload(**payload)
+        token_data = JwtTokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
