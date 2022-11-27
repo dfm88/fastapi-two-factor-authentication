@@ -40,16 +40,19 @@ def get_decoded_two_factor_auth_key(value: str) -> str:
     return _fernet_decode(value=value)
 
 
+def _get_fake_otp_token(nr_digits: int = settings.TFA_TOKEN_LENGTH):
+    return ''.join(
+        str(random.randint(0, 9)) for _ in range(nr_digits)
+    )
+
+
 def get_fake_otp_tokens(
     nr_digits: int = settings.TFA_TOKEN_LENGTH,
     nr_tokens: int = settings.TFA_BACKUP_TOKENS_NR
 ) -> Iterator[str]:
     for _ in range(nr_tokens):
-        random_otp = ''.join(
-            str(random.randint(0, 9)) for _ in range(nr_digits)
-        )
+        random_otp = _get_fake_otp_token(nr_digits=nr_digits)
         yield random_otp
-
 
 
 def get_current_totp(user: User) -> pyotp.TOTP:

@@ -12,7 +12,7 @@ fastapi = "^0.87.0"
 passlib = {extras = ["bycrypt"], version = "^1.7.4"}
 pytest = "^7.2.0"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-celery = "^5.2.7"
+celery = {extras = ["pytest"], version = "^5.2.7"}
 pydantic = {extras = ["email"], version = "^1.10.2"}
 ipdb = "^0.13.9"
 python-dotenv = "^0.21.0"
@@ -31,6 +31,10 @@ qrcode = {extras = ["pil"], version = "^7.3.1"}
 pillow = "^9.3.0"
 redis = "^4.3.5"
 flower = "1.1.0"
+pytest-asyncio = "^0.20.2"
+aiosqlite = "^0.17.0"
+httpx = "^0.23.1"
+pytest-celery = "^0.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

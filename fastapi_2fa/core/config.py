@@ -87,7 +87,19 @@ class ProductionConfig(BaseConfig):
 
 
 class TestingConfig(BaseConfig):
-    LOGGING_LEVEL = "DEBUG"
+    # define new attributes with respect to BaseConfig
+    DATABASE_CONNECT_DICT: dict = {"check_same_thread": False}
+    LOGGING_LEVEL = 'DEBUG'
+    SQLALCHEMY_DATABASE_TEST_SYNC_URI: str = "sqlite:///tests/test_db.db"
+
+    # celery test config
+    task_always_eager = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # override attributes of BaseConfig
+        # https://fastapi.tiangolo.com/advanced/testing-database/
+        self.SQLALCHEMY_DATABASE_URI: str = "sqlite+aiosqlite:///tests/test_db.db"
 
 
 @lru_cache()

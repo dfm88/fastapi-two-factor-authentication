@@ -39,7 +39,7 @@ auth_router = APIRouter()
     },
 )
 async def signup(
-    db: Session = Depends(get_db), user_data: UserCreate = Depends()
+    user_data: UserCreate, db: Session = Depends(get_db)
 ) -> Any:
     try:
         user = await user_crud(transaction=True).create(

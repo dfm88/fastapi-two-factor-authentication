@@ -1,0 +1,9 @@
+- test api
+  - AUTH
+    - signup
+      - test create user
+      - test create user tfa enabled device email
+      - test create user tfa enabled device code_gen
+    - login
+      - test login of user with no tfa
+      - test login of user with tfa
