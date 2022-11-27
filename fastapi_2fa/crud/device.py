@@ -4,9 +4,8 @@ from sqlalchemy.orm import Session
 from fastapi_2fa.core.enums import DeviceTypeEnum
 from fastapi_2fa.core.two_factor_auth import (
     create_encoded_two_factor_auth_key, get_fake_otp_tokens, qr_code_from_key)
-from fastapi_2fa.crud.backup_token import backup_token_crud
 from fastapi_2fa.crud.base_crud import CrudBase
-from fastapi_2fa.models.device import Device
+from fastapi_2fa.models.device import BackupToken, Device
 from fastapi_2fa.models.users import User
 from fastapi_2fa.schemas.backup_token_schema import BackupTokenCreate
 from fastapi_2fa.schemas.device_schema import DeviceCreate, DeviceUpdate
@@ -30,11 +29,12 @@ class DeviceCrud(CrudBase[Device, DeviceCreate, DeviceUpdate]):
                 token=token,
                 device_id=db_device.id
             )
-            token_db = await backup_token_crud(
-                transaction=self.transaction
-            ).create(db=db, obj_in=backup_token_schema)
+            token_db = BackupToken(**backup_token_schema.dict())
             db_device.backup_tokens.append(token_db)
-        db.add(db_device)
+
+        # avoid sqlachemy error  'obj already attached to session...'
+        device_merged_session = await db.merge(db_device)
+        db.add(device_merged_session)
         if await self.handle_commit(db):
             await db.refresh(db_device)
 

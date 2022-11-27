@@ -64,7 +64,7 @@ class BackupTokenFactory(factory.alchemy.SQLAlchemyModelFactory):
         return _get_fake_otp_token()
 
 
-class UserFactoryNoTfa(factory.alchemy.SQLAlchemyModelFactory):
+class UserFactoryBase(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
         sqlalchemy_session = session
@@ -74,7 +74,6 @@ class UserFactoryNoTfa(factory.alchemy.SQLAlchemyModelFactory):
 
     full_name = factory.Sequence(lambda n: f"test_user{n+1}")
     email = factory.Sequence(lambda n: f"test_user{n+1}@mail.com")
-    tfa_enabled = False
     password = '123456'
 
     @factory.lazy_attribute
@@ -82,12 +81,16 @@ class UserFactoryNoTfa(factory.alchemy.SQLAlchemyModelFactory):
         return get_password_hash(self.password)
 
 
-class UserEmailDeviceFactory(UserFactoryNoTfa):
+class UserFactoryNoTfa(UserFactoryBase):
+    tfa_enabled = False
+
+
+class UserEmailDeviceFactory(UserFactoryBase):
     tfa_enabled = True
     device = factory.SubFactory(EmailDeviceFactory)
 
 
-class UserCodGenDeviceFactory(UserFactoryNoTfa):
+class UserCodGenDeviceFactory(UserFactoryBase):
     tfa_enabled = True
     device = factory.SubFactory(CodeGenDeviceFactory)
 

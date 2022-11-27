@@ -1,6 +1,5 @@
 import pytest
 
-
 SIGNUP_URL = "/api/v1/auth/signup"
 LOGIN_URL = "/api/v1/auth/login"
 TEST_JWT_TOKEN = "/api/v1/auth/test-token"

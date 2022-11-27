@@ -3,7 +3,7 @@ from typing import Generator
 import pytest_asyncio
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import close_all_sessions, sessionmaker
 
 from fastapi_2fa.core.config import TestingConfig
 from fastapi_2fa.db.base import Base
@@ -36,12 +36,13 @@ TestingSyncSessionLocal = sessionmaker(
 )
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="function")
 async def async_session() -> AsyncSession:
     session = TestingAsyncSessionLocal
 
     async with session() as s:
         async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
 
         yield s
@@ -50,6 +51,7 @@ async def async_session() -> AsyncSession:
         await conn.run_sync(Base.metadata.drop_all)
 
     await async_engine.dispose()
+    close_all_sessions()
 
 
 async def override_get_db() -> Generator:
@@ -59,7 +61,7 @@ async def override_get_db() -> Generator:
         await db_sess.commit()
         print('committed in test db...')
     except Exception as ex:
-        print(f'rolling db for exception {ex} ...')
+        print(f'rolling test db for exception {ex} ...')
         await db_sess.rollback()
     finally:
         print('closing test db...')

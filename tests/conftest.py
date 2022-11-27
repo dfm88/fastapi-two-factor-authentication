@@ -23,6 +23,9 @@ user_with_cod_gen_device_factory = factories.user_with_cod_gen_device_factory
 user_data_no_tfa = factories.user_data_no_tfa
 user_data_tfa_email_fixture = factories.user_data_tfa_email_fixture
 user_data_tfa_code_gen_fixture = factories.user_data_tfa_code_gen_fixture
+correct_totp_token_for_user = factories.correct_totp_token_for_user
+wrong_totp_token_for_user = factories.wrong_totp_token_for_user
+correct_bkp_token_for_user = factories.correct_bkp_token_for_user
 
 
 @pytest.fixture(scope="session")

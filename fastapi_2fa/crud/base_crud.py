@@ -94,4 +94,4 @@ class CrudBase(
     async def remove(self, db: Session, *, id: int) -> bool:
         query = delete(self.model).where(self.model.id == id)
         await db.execute(query)
-        return self.handle_commit(db)
+        return await self.handle_commit(db)

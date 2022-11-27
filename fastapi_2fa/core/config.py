@@ -71,8 +71,8 @@ class BaseConfig(BaseSettings):
     # Celery ACK the queue only when task is completed
     CELERY_TASK_ACKS_LATE = True
     imports = ("fastapi_2fa.tasks.tasks",)
-    task_serializer = "pickle"
-    accept_content = ('pickle', 'json',)
+    task_serializer = 'json'
+    accept_content = ('json',)
 
     class Config:
         case_sensitive = True
@@ -115,5 +115,7 @@ def get_settings():
     config_cls = config_cls_dict[config_name]
     return config_cls()
 
+print(os.environ)
 
 settings = get_settings()
+

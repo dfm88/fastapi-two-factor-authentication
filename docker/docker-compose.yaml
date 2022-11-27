@@ -2,78 +2,94 @@ version: '3.7'
 
 services:
 ## WEB APP
-
+  web:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    image: fastapi_2fa
+    container_name: fastapi_2fa
+    entrypoint: ./scripts/entrypoint.sh
+    # stdin_open: true
+    # tty: true
+    ports:
+      - "5555:5555"
+    env_file:
+      - ../env/.env
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+      - celery_worker
 
 ## POSTGRESQL
   db:
     image: postgres
-    container_name: fastapi-2fa-db
+    container_name: fastapi_2fa-db
     restart: always
-    volumes:
-      - ./data/pgdata:/var/lib/postgresql/my_data
+    # volumes:
+    #   - ./data/pgdata:/var/lib/postgresql/my_data
     env_file:
       - ../env/.env
-    environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
-      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
-      - result_backend=redis://fastapi-2fa-cache:6379/0
-
+    # environment:
+    #   - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi_2fa-db:5432/postgres
+    #   - CELERY_BROKER_URL=amqp://admin:admin@fastapi_2fa-rabbitmq:5672/
+    #   - result_backend=redis://fastapi_2fa-cache:6379/0
     ports:
       - "5454:5432"
 
 ## REDIS
   redis:
     image: redis:alpine
-    container_name: fastapi-2fa-cache
+    container_name: fastapi_2fa-cache
     restart: always
     env_file:
       - ../env/.env
-    environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
-      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
-      - result_backend=redis://fastapi-2fa-cache:6379/0
+    # environment:
+    #   - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi_2fa-db:5432/postgres
+    #   - CELERY_BROKER_URL=amqp://admin:admin@fastapi_2fa-rabbitmq:5672/
+    #   - result_backend=redis://fastapi_2fa-cache:6379/0
     ports:
       - "6389:6379"
 
   rabbitmq:
-    container_name: fastapi-2fa-rabbitmq
+    container_name: fastapi_2fa-rabbitmq
     image: rabbitmq:3-management
     env_file:
       - ../env/.env
-    environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
-      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
-      - result_backend=redis://fastapi-2fa-cache:6379/0
+    # environment:
+    #   - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi_2fa-db:5432/postgres
+    #   - CELERY_BROKER_URL=amqp://admin:admin@fastapi_2fa-rabbitmq:5672/
+    #   - result_backend=redis://fastapi_2fa-cache:6379/0
     ports:
       - "5672:5672"
 
   celery_worker:
-    container_name: fastapi-2fa-celery
+    container_name: fastapi_2fa-celery
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
     image: fastapi_2fa_celery_worker
-    entrypoint: /scripts/start_celery_worker.sh
+    entrypoint: ./scripts/start_celery_worker.sh
     env_file:
       - ../env/.env
-    environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi-2fa-db:5432/postgres
-      - CELERY_BROKER_URL=amqp://admin:admin@fastapi-2fa-rabbitmq:5672/
-      - result_backend=redis://fastapi-2fa-cache:6379/0
+    # environment:
+    #   - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi_2fa-db:5432/postgres
+    #   - CELERY_BROKER_URL=amqp://admin:admin@fastapi_2fa-rabbitmq:5672/
+    #   - result_backend=redis://fastapi_2fa-cache:6379/0
     depends_on:
         - redis
         - db
         - rabbitmq
 
   flower:
-    container_name: fastapi-2fa-flower
+    container_name: fastapi_2fa-flower
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
     image: fastapi_2fa_celery_flower
-    entrypoint: /scripts/start_celery_flower.sh
-    volumes:
-        - flower_db:/app/flower_db
+    entrypoint: ./scripts/start_celery_flower.sh
+    # volumes:
+    #     - flower_db:/app/flower_db
     env_file:
       - ../env/.env
     ports:
@@ -84,6 +100,6 @@ services:
         - rabbitmq
         - celery_worker
 
-volumes:
-   pgdata:
-   flower_db:
+# volumes:
+#    pgdata:
+#    flower_db:

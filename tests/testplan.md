@@ -7,3 +7,11 @@
     - login
       - test login of user with no tfa
       - test login of user with tfa
+  - TWO FACTOR AUTH
+    - login_tfa
+      - user with tfa and wrong totp token
+      - user with tfa and correct totp token
+    - recover_tfa
+      - user that recovers tfa using one of his bkp tokens is logged in and has one less
+    - enable_tfa
+      - user with no tfa get tfa enabled

@@ -10,10 +10,27 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_password_hash(password: str) -> str:
+    """Returns the hashed version of a string
+
+    Args:
+        password (str)
+
+    Returns:
+        str: hashed psw
+    """
     return pwd_context.hash(password)
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
+    """Check password hash with given hashed value
+
+    Args:
+        password (str): raw password
+        hashed_password (str): hashed version of raw password
+
+    Returns:
+        bool: True if passwords match hashed password
+    """
     return pwd_context.verify(password, hashed_password)
 
 
@@ -22,6 +39,16 @@ def _create_token(
     expire_minutes: int,
     key: str,
 ) -> str:
+    """Create a JWT token
+
+    Args:
+        subject (int | Any)
+        expire_minutes (int)
+        key (str): key to do the encoding/decoding
+
+    Returns:
+        str: encoded jwt
+    """
     expires_delta = datetime.utcnow() + timedelta(minutes=expire_minutes)
     to_encode = {
         "sub": str(subject),

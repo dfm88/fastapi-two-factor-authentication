@@ -2,7 +2,7 @@
 # set common builds arguments
 ##############################
 # constants args
-ARG DEFAULT_IMAGE_NAME=fastapi-2fa
+ARG DEFAULT_IMAGE_NAME=fastapi_2fa
 ARG DEFAULT_POETRY_VERSION=1.2.1
 
 ##############################
@@ -76,5 +76,7 @@ WORKDIR /${IMAGE_NAME}
 COPY . ./
 
 RUN chmod +x /${IMAGE_NAME}/scripts/entrypoint.sh
+RUN chmod +x /${IMAGE_NAME}/scripts/start_celery_worker.sh
+RUN chmod +x /${IMAGE_NAME}/scripts/start_celery_flower.sh
 
 ENTRYPOINT ["sh", "scripts/entrypoint.sh"]
