@@ -58,7 +58,7 @@ The app run inside Docker, orchestrated by docker-compose. Database is Postgres,
 
 ### **[Flowchart](#flowchart)**
 
-<img src="https://raw.githubusercontent.com/dfm88/fastapi-two-factor-authentication/main/docs/two_factor_flowchart.drawio.png" alt="image" style="width:600px;"/>
+<img src="https://raw.githubusercontent.com/dfm88/fastapi-two-factor-authentication/main/docs/two_factor_flowchart.drawio.png" alt="image" style="width:700px;"/>
 
 
 ### **[Models](#models)**
