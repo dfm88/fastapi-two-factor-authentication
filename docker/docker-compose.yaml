@@ -9,6 +9,7 @@ services:
     image: fastapi_2fa
     container_name: fastapi_2fa
     entrypoint: ./scripts/entrypoint.sh
+    restart: always
     # stdin_open: true
     # tty: true
     ports:
@@ -56,12 +57,14 @@ services:
     image: rabbitmq:3-management
     env_file:
       - ../env/.env
+    restart: always
     # environment:
     #   - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi_2fa-db:5432/postgres
     #   - CELERY_BROKER_URL=amqp://admin:admin@fastapi_2fa-rabbitmq:5672/
     #   - result_backend=redis://fastapi_2fa-cache:6379/0
     ports:
       - "5672:5672"
+      - "15672:15672"
 
   celery_worker:
     container_name: fastapi_2fa-celery
@@ -72,6 +75,7 @@ services:
     entrypoint: ./scripts/start_celery_worker.sh
     env_file:
       - ../env/.env
+    restart: always
     # environment:
     #   - SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://admin:admin@fastapi_2fa-db:5432/postgres
     #   - CELERY_BROKER_URL=amqp://admin:admin@fastapi_2fa-rabbitmq:5672/

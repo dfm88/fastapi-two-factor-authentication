@@ -71,6 +71,8 @@ COPY --from=build /${IMAGE_NAME}/venv /${IMAGE_NAME}/venv/
 # add venv to PATH
 ENV PATH /${IMAGE_NAME}/venv/bin:$PATH
 
+RUN apt update && apt install -y vim
+
 # copying codebase
 WORKDIR /${IMAGE_NAME}
 COPY . ./
