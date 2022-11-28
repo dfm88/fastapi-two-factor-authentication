@@ -100,7 +100,7 @@ async def get_my_qrcode(
 ) -> Any:
     if (
         user.tfa_enabled and
-        user_crud.device.device_type == DeviceTypeEnum.CODE_GENERATOR
+        user.device.device_type == DeviceTypeEnum.CODE_GENERATOR
     ):
         qr_code = qr_code_from_key(
             encoded_key=user.device.key,
