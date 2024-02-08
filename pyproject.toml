@@ -44,6 +44,12 @@ black = "^22.10.0"
 isort = "^5.10.1"
 bandit = "^1.7.4"
 
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2.6"
+sphinx-rtd-theme = "^2.0.0"
+ghp-import = "^2.1.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

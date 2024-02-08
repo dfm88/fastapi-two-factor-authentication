@@ -10,29 +10,29 @@ load_dotenv(dotenv_path="./env/.env")
 
 
 class BaseConfig(BaseSettings):
-    API_V1_STR: str = os.environ.get("API_V1_STR")
-    PROJECT_NAME: str = os.environ.get("PROJECT_NAME")
+    API_V1_STR: str = os.environ.get("API_V1_STR", "/api/v1")
+    PROJECT_NAME: str = os.environ.get("PROJECT_NAME", "fastapi_2fa")
 
-    FAKE_EMAIL_SENDER: EmailStr = os.environ.get("FAKE_EMAIL_SENDER")
+    FAKE_EMAIL_SENDER: EmailStr = os.environ.get("FAKE_EMAIL_SENDER", "fake@mail.com")
 
     # # JWT
-    JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY")
-    JWT_SECRET_KEY_REFRESH: str = os.environ.get("JWT_SECRET_KEY_REFRESH")
-    PRE_TFA_SECRET_KEY: str = os.environ.get("PRE_TFA_SECRET_KEY")
-    ALGORITHM: str = os.environ.get("ALGORITHM")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 15)
+    JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY", "9d58ca3446806034a68b02cbcdf69d8f")
+    JWT_SECRET_KEY_REFRESH: str = os.environ.get("JWT_SECRET_KEY_REFRESH", "mXuqbFTs2kTmz+6rBpJh1B4T+zHQh8Nq1nc7BOrWTb4=")
+    PRE_TFA_SECRET_KEY: str = os.environ.get("PRE_TFA_SECRET_KEY", "11rWUgZLTckPHI7KO1SPbFgG1OILrDQjI7v9Q7KgYZw=")
+    ALGORITHM: str = os.environ.get("ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
     REFRESH_TOKEN_EXPIRE_MINUTES: int = os.environ.get(
         "REFRESH_TOKEN_EXPIRE_MINUTES", 60 * 24
     )  # 24 h
 
     # # 2 FACTOR AUTHENTICATION
-    FERNET_KEY_TFA_TOKEN: str = os.environ.get("FERNET_KEY_TFA_TOKEN")
+    FERNET_KEY_TFA_TOKEN: str = os.environ.get("FERNET_KEY_TFA_TOKEN", "J_TYpprFmoLlVM0MNZElt8IwEkvEEhAwCmb8P_f7Fro=")
     PRE_TFA_TOKEN_EXPIRE_MINUTES: int = os.environ.get(
         "PRE_TFA_TOKEN_EXPIRE_MINUTES", 2
     )
-    TFA_BACKUP_TOKENS_NR: int = os.environ.get("TFA_BACKUP_TOKENS_NR")
-    TFA_TOKEN_LENGTH: int = os.environ.get("TFA_TOKEN_LENGTH")
-    TOTP_ISSUER_NAME: str = os.environ.get("TOTP_ISSUER_NAME")
+    TFA_BACKUP_TOKENS_NR: int = os.environ.get("TFA_BACKUP_TOKENS_NR", 5)
+    TFA_TOKEN_LENGTH: int = os.environ.get("TFA_TOKEN_LENGTH", 6)
+    TOTP_ISSUER_NAME: str = os.environ.get("TOTP_ISSUER_NAME", "fastapi_2fa")
     # default tolerance = 30 sec
     # this number is multiplied for 30 sec to increas it.
     # -->MAX = 10 => 5 minutes
@@ -48,9 +48,9 @@ class BaseConfig(BaseSettings):
     )
 
     # # DB
-    SQLALCHEMY_DATABASE_URI: str = os.environ.get("SQLALCHEMY_DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI: str = os.environ.get("SQLALCHEMY_DATABASE_URI", "postgresql+asyncpg://admin:admin@fastapi_2fa-db:5432/postgres")
 
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    @validator("SQLALCHEMY_DATABASE_URI", pre=True, allow_reuse=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if v is None:
             raise ValueError(v)
