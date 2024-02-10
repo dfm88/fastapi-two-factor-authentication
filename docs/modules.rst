@@ -5,3 +5,11 @@ fastapi_2fa
    :maxdepth: 4
 
    fastapi_2fa
+
+Examples
+========
+
+.. toctree::
+   :maxdepth: 2
+
+   example

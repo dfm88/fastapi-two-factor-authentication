@@ -36,6 +36,8 @@ aiosqlite = "^0.17.0"
 httpx = "^0.23.1"
 pytest-celery = "^0.0.0"
 hypothesis = "^6.58.1"
+ipykernel = "^6.29.2"
+pandoc = "^2.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -49,6 +51,7 @@ bandit = "^1.7.4"
 sphinx = "^7.2.6"
 sphinx-rtd-theme = "^2.0.0"
 ghp-import = "^2.1.0"
+nbsphinx = "^0.9.3"
 
 [build-system]
 requires = ["poetry-core"]
