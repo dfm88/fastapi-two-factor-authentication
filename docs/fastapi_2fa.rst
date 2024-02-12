@@ -24,6 +24,7 @@ fastapi\_2fa.main module
 .. automodule:: fastapi_2fa.main
    :members:
    :undoc-members:
+
    :show-inheritance:
 
 Module contents
@@ -32,4 +33,5 @@ Module contents
 .. automodule:: fastapi_2fa
    :members:
    :undoc-members:
+
    :show-inheritance:

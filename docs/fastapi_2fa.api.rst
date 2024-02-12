@@ -15,4 +15,5 @@ Module contents
 .. automodule:: fastapi_2fa.api
    :members:
    :undoc-members:
+
    :show-inheritance:

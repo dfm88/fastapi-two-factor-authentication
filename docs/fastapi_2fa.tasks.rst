@@ -10,6 +10,7 @@ fastapi\_2fa.tasks.celery\_conf module
 .. automodule:: fastapi_2fa.tasks.celery_conf
    :members:
    :undoc-members:
+
    :show-inheritance:
 
 fastapi\_2fa.tasks.tasks module
@@ -18,6 +19,7 @@ fastapi\_2fa.tasks.tasks module
 .. automodule:: fastapi_2fa.tasks.tasks
    :members:
    :undoc-members:
+
    :show-inheritance:
 
 Module contents
@@ -26,4 +28,5 @@ Module contents
 .. automodule:: fastapi_2fa.tasks
    :members:
    :undoc-members:
+
    :show-inheritance:
