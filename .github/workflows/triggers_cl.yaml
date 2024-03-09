@@ -26,4 +26,6 @@ jobs:
       uses: dfm88/fastapi-two-factor-authentication/.github/workflows/cl.yaml@develop
       permissions:
          contents: write
+      secrets:
+        githubToken: ${{ secrets.GITHUB_TOKEN }}
 

@@ -4,6 +4,10 @@ name: Changelog Pipeline
 on:
   workflow_dispatch:
   workflow_call:
+    secrets:
+      githubToken:
+        description: 'The GitHub token for the repository'
+        required: true
 
 jobs:
   update-changelog2:
