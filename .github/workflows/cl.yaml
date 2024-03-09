@@ -69,26 +69,11 @@ jobs:
         with:
           commit_message: "chore(changelog): update changelog [skip ci]"
 
-      - name: Print New Tag
-        id: print_new_tag
-        run: |
-          echo "New Tag: ${{ steps.generate_unreleased_changelog.outputs.version }}"
-
-      - name: Create and push tag
-        env:
-          NEW_TAG: ${{ steps.generate_unreleased_changelog.outputs.version }}
-        run: |
-          git tag $NEW_TAG -m "Version $NEW_TAG"
-          git push origin $NEW_TAG -m "Version $NEW_TAG"
-
-        # Optional: Create GitHub release
-      - name: Create GitHub Release
+      - name: release
         uses: actions/create-release@v1
+        with:
+          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}"
+          commitish: ${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_TAG: ${{ steps.generate_unreleased_changelog.outputs.version }}
-        with:
-          tag_name: ${{ env.NEW_TAG }}
-          release_name: Release ${{ env.NEW_TAG }}
-          body: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
-
