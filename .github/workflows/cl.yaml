@@ -57,7 +57,7 @@ jobs:
           release_name: Release ${{ steps.generate_unreleased_changelog.outputs.version }}
           tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}
           commitish: ${{ github.sha }}
-          body: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
+          body: cat ${{ steps.generate_unreleased_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
