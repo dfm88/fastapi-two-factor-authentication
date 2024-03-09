@@ -92,6 +92,7 @@ commit_parsers = [
     { message = "(?i)^build", group = "<!-- 29 -->👷 CI/CD"},
     { message = ".*", group = "<!-- 30 -->📝 Other"},
     { message = "(?i)^merge", group = "<!-- 31 -->🔀 Merges"},
+    { message = "(?i)^merge ", group = "<!-- 32 -->🔀 Merges"},
 ]
 # protect breaking changes from being skipped due to matching a skipping commit_parser
 protect_breaking_commits = false

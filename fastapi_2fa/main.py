@@ -57,7 +57,7 @@ if settings.BACKEND_CORS_ORIGINS:
 
 @app.get('/')
 async def main():
-    return "APp is running"
+    return "App is running"
 
 
 if __name__ == '__main__':
