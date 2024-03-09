@@ -1,0 +1,33 @@
+name: Trigger Changelog Pipeline
+
+on:
+    push:
+      branches: ["develop"]
+    pull_request:
+      branches: ["develop"]
+
+    workflow_dispatch:
+
+jobs:
+    trigger-changelog-pipeline:
+      runs-on: ubuntu-latest
+      permissions:
+          contents: write
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+  
+        - name: Print head commit
+          id: print_head_commit
+          run: |
+              echo "Head commit: ${{ github.sha }}"
+    
+    actual-trigger-changelog-pipeline:
+      runs-on: ubuntu-latest    
+      permissions:
+         contents: write
+      steps:
+        - name: Trigger Changelog Pipeline
+          id: trigger-changelog-pipeline
+          uses: dfm88/fastapi-two-factor-authentication/.github/workflows/cl.yaml@develop
+
