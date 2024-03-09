@@ -1,5 +1,15 @@
 # Changelog
 
+# [0.5.0](https://github.com/dfm88/fastapi-two-factor-authentication/compare/vv0.4.0...vv0.5.0) - (2024-03-09)
+
+## <!-- 0 -->🚀 Features
+
+- Dispatch wf6 ([8051e03](https://github.com/dfm88/fastapi-two-factor-authentication/commit/8051e03034a22f6ec5980b15e2b117de5911ad0a))  - (Diego Margoni)
+
+## <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- **changelog:** Update changelog [skip ci] ([c2b92f3](https://github.com/dfm88/fastapi-two-factor-authentication/commit/c2b92f32be5f9f1a58b2b8f8889c124932f982cb))  - (dfm88)
+
 # [0.4.0](https://github.com/dfm88/fastapi-two-factor-authentication/compare/vv0.3.0...vv0.4.0) - (2024-03-09)
 
 ## <!-- 0 -->🚀 Features
