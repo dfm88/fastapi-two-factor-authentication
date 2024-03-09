@@ -27,6 +27,6 @@ jobs:
       permissions:
          contents: write
       secrets:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # githubToken: ${{ secrets.GITHUB_TOKEN }}
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
