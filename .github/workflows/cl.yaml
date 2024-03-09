@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate unreleased changelog
-        uses: orhun/git-cliff-action@v2
+        uses: orhun/git-cliff-action@v3
         id: generate_unreleased_changelog
         with:
           config: ./cliff.toml
@@ -57,7 +57,8 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Update CHANGELOG.md
-        uses: orhun/git-cliff-action@v2
+        id: update_changelog
+        uses: orhun/git-cliff-action@v3
         with:
           config: ./cliff.toml
           args: --bump
@@ -72,8 +73,9 @@ jobs:
       - name: release
         uses: actions/create-release@v1
         with:
-          release_name: Release ${{ github.ref }}
-          tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}"
+          release_name: Release ${{ steps.generate_unreleased_changelog.outputs.version }}
+          tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}
           commitish: ${{ github.sha }}
+          body: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
