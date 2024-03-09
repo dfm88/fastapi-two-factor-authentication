@@ -28,33 +28,9 @@ jobs:
           args: --unreleased --bump
         env:
           OUTPUT: CHANGELOG.md
-  
+
       - name: Print the changelog
         run: cat "${{ steps.generate_unreleased_changelog.outputs.changelog }}"
-
-      - name: Format changelog for Slack
-        id: format_for_slack
-        run: |
-          output=$(python scripts/changelog_slack.py ${{ steps.generate_unreleased_changelog.outputs.changelog }})
-          echo "::set-output name=formatted_json::$output"
-          echo "Formatted JSON output for debugging: $output"
-          echo "Changelog for debugging: ${{ steps.generate_unreleased_changelog.outputs.changelog }}"
-        env:
-          UNRELEASED_CHANGELOG: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
-      
-      # - name: Debug Python
-      #   id: debug_python
-      #   run: |
-      #     echo "Debug2 Python output for debugging: ${{ steps.format_for_slack.outputs.formatted_json }}"
-
-
-      - name: Send custom JSON data to Slack workflow
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          channel-id: "C06N79SSDD5"
-          payload: ${{ steps.format_for_slack.outputs.formatted_json }}
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Update CHANGELOG.md
         id: update_changelog
@@ -65,17 +41,40 @@ jobs:
         env:
           OUTPUT: CHANGELOG.md
 
-      - name: Commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "chore(changelog): update changelog [skip ci]"
+      # - name: Commit and push changes
+      #   uses: stefanzweifel/git-auto-commit-action@v4
+      #   with:
+      #     commit_message: "chore(changelog): update changelog [skip ci]"
+
+      - name: Print New Tag
+        id: print_new_tag
+        run: |
+          echo "New Tag: v${{ steps.generate_unreleased_changelog.outputs.version }}"
 
       - name: release
         uses: actions/create-release@v1
         with:
-          release_name: Release ${{ steps.generate_unreleased_changelog.outputs.version }}
-          tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}
+          release_name: Release v${{ steps.generate_unreleased_changelog.outputs.version }}
+          tag_name: v${{ steps.generate_unreleased_changelog.outputs.version }}
           commitish: ${{ github.sha }}
           body: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Format changelog for Slack
+        id: format_for_slack
+        run: |
+          output=$(python scripts/changelog_slack.py ${{ steps.generate_unreleased_changelog.outputs.changelog }})
+          echo "::set-output name=formatted_json::$output"
+          echo "Formatted JSON output for debugging: $output"
+          echo "Changelog for debugging: ${{ steps.generate_unreleased_changelog.outputs.changelog }}"
+        env:
+          UNRELEASED_CHANGELOG: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
+
+      - name: Send custom JSON data to Slack workflow
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: "C06N79SSDD5"
+          payload: ${{ steps.format_for_slack.outputs.formatted_json }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
