@@ -49,13 +49,13 @@ jobs:
       - name: Print New Tag
         id: print_new_tag
         run: |
-          echo "New Tag: v${{ steps.generate_unreleased_changelog.outputs.version }}"
+          echo "New Tag: ${{ steps.generate_unreleased_changelog.outputs.version }}"
 
       - name: release
         uses: actions/create-release@v1
         with:
           release_name: Release v${{ steps.generate_unreleased_changelog.outputs.version }}
-          tag_name: v${{ steps.generate_unreleased_changelog.outputs.version }}
+          tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}
           commitish: ${{ github.sha }}
           body: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
         env:
