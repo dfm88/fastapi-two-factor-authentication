@@ -26,8 +26,8 @@ jobs:
         with:
           config: ./cliff.toml
           args: --unreleased --bump
-        env:
-          OUTPUT: CHANGELOG.md
+        # env:
+        #   OUTPUT: CHANGELOG.md
 
       - name: Print the changelog
         run: cat "${{ steps.generate_unreleased_changelog.outputs.changelog }}"
@@ -54,7 +54,7 @@ jobs:
       - name: release
         uses: actions/create-release@v1
         with:
-          release_name: Release v${{ steps.generate_unreleased_changelog.outputs.version }}
+          release_name: Release ${{ steps.generate_unreleased_changelog.outputs.version }}
           tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}
           commitish: ${{ github.sha }}
           body: ${{ steps.generate_unreleased_changelog.outputs.changelog }}
