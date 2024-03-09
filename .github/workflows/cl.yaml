@@ -69,14 +69,6 @@ jobs:
         with:
           commit_message: "chore(changelog): update changelog [skip ci]"
 
-      - name: New Tag
-        id: new_tag
-        uses: orhun/git-cliff-action@v3
-        with:
-          config: ./cliff.toml
-          args: --bumped-version
-
-
       - name: Print New Tag
         id: print_new_tag
         run: |
