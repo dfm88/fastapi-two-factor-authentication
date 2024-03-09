@@ -27,14 +27,10 @@ jobs:
           config: ./cliff.toml
           args: --unreleased --bump
 
-      - name: Get unreleased changelog content
-        id: get_unreleased_changelog
-        run: |
-          content=$(cat ${{ steps.generate_unreleased_changelog.outputs.changelog }})
-          echo "::set-output name=out_unreleased_changelog::$content"
-
       # - name: Print the changelog
       #   run: cat "${{ steps.generate_unreleased_changelog.outputs.changelog }}"
+      # - name: Print the changelog
+      #   run: echo "${{ steps.generate_unreleased_changelog.outputs.content}}"
 
       - name: Update CHANGELOG.md
         id: update_changelog
@@ -50,10 +46,10 @@ jobs:
         with:
           commit_message: "chore(changelog): update changelog [skip ci]"
 
-      # - name: Print New Tag
-      #   id: print_new_tag
-      #   run: |
-      #     echo "New Tag: ${{ steps.generate_unreleased_changelog.outputs.version }}"
+      # # - name: Print New Tag
+      # #   id: print_new_tag
+      # #   run: |
+      # #     echo "New Tag: ${{ steps.generate_unreleased_changelog.outputs.version }}"
 
       - name: release
         uses: actions/create-release@v1
@@ -61,7 +57,7 @@ jobs:
           release_name: Release ${{ steps.generate_unreleased_changelog.outputs.version }}
           tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}
           commitish: ${{ github.sha }}
-          body: ${{ steps.get_unreleased_changelog.outputs.out_unreleased_changelog }}
+          body: ${{ steps.generate_unreleased_changelog.outputs.content }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
