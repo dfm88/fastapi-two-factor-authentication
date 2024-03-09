@@ -26,11 +26,15 @@ jobs:
         with:
           config: ./cliff.toml
           args: --unreleased --bump
-        # env:
-        #   OUTPUT: CHANGELOG.md
 
-      - name: Print the changelog
-        run: cat "${{ steps.generate_unreleased_changelog.outputs.changelog }}"
+      - name: Get unreleased changelog content
+        id: get_unreleased_changelog
+        run: |
+          content=$(cat ${{ steps.generate_unreleased_changelog.outputs.changelog }})
+          echo "::set-output name=out_unreleased_changelog::$content"
+
+      # - name: Print the changelog
+      #   run: cat "${{ steps.generate_unreleased_changelog.outputs.changelog }}"
 
       - name: Update CHANGELOG.md
         id: update_changelog
@@ -41,15 +45,15 @@ jobs:
         env:
           OUTPUT: CHANGELOG.md
 
-      # - name: Commit and push changes
-      #   uses: stefanzweifel/git-auto-commit-action@v4
-      #   with:
-      #     commit_message: "chore(changelog): update changelog [skip ci]"
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(changelog): update changelog [skip ci]"
 
-      - name: Print New Tag
-        id: print_new_tag
-        run: |
-          echo "New Tag: ${{ steps.generate_unreleased_changelog.outputs.version }}"
+      # - name: Print New Tag
+      #   id: print_new_tag
+      #   run: |
+      #     echo "New Tag: ${{ steps.generate_unreleased_changelog.outputs.version }}"
 
       - name: release
         uses: actions/create-release@v1
@@ -57,7 +61,7 @@ jobs:
           release_name: Release ${{ steps.generate_unreleased_changelog.outputs.version }}
           tag_name: ${{ steps.generate_unreleased_changelog.outputs.version }}
           commitish: ${{ github.sha }}
-          body: cat ${{ steps.generate_unreleased_changelog.outputs.changelog }}
+          body: ${{ steps.get_unreleased_changelog.outputs.out_unreleased_changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
