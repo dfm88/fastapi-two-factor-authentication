@@ -1,3 +1,9 @@
+# Pipeline that generates a changelog using git-cliff
+# starting from cliff.toml configuration file
+# the changelog news are then pushed to the CHANGELOG.md file and sent to Slack
+# a new tag is created based on semantic versioning of commits
+# if commit contains '[skip cl notify]' the changelog is not sent to Slack
+
 ---
 name: Changelog Pipeline
 
