@@ -5,8 +5,11 @@ on:
   workflow_dispatch:
   workflow_call:
     secrets:
-      githubToken:
+      GITHUB_TOKEN:
         description: 'The GitHub token for the repository'
+        required: true
+      SLACK_BOT_TOKEN:
+        description: 'The Slack bot token'
         required: true
 
 jobs:
