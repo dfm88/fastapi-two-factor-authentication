@@ -23,11 +23,7 @@ jobs:
               echo "Head commit: ${{ github.sha }}"
     
     actual-trigger-changelog-pipeline:
-      runs-on: ubuntu-latest    
+      uses: dfm88/fastapi-two-factor-authentication/.github/workflows/cl.yaml@develop
       permissions:
          contents: write
-      steps:
-        - name: Trigger Changelog Pipeline
-          id: trigger-changelog-pipeline
-          uses: dfm88/fastapi-two-factor-authentication/.github/workflows/cl.yaml@develop
 
